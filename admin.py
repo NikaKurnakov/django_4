@@ -3,3 +3,5 @@ from .models import Pokemon
 
 
 admin.site.register(Pokemon)
+class PokemonAdmin(admin.ModelAdmin):
+    list_display = ('title', 'image')
