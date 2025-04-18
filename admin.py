@@ -10,15 +10,22 @@ class PokemonAdmin(admin.ModelAdmin):
     list_display = ('title', 'image')
 
 class PokemonEntityAdmin(admin.ModelAdmin):
-    list_display = ('pokemon', 'lat', 'lon', 'appeared_at', 'disappeared_at')
-    list_filter = ('pokemon', 'appeared_at')
+    list_display = ('pokemon', 'level', 'health', 'strength', 'defence', 'stamina', 'is_active')
+    list_filter = ('pokemon', 'level')
     search_fields = ('pokemon__title',)
     fieldsets = (
-        (None, {
+        ('Основное', {
             'fields': ('pokemon', ('lat', 'lon'))
         }),
-        ('Временные параметры', {
+        ('Время', {
             'fields': ('appeared_at', 'disappeared_at'),
             'classes': ('collapse',)
+        }),
+        ('Характеристики', {
+            'fields': (
+                ('level', 'health'),
+                ('strength', 'defence'),
+                ('stamina',)
+            )
         }),
     )
