@@ -7,7 +7,13 @@ admin.site.register(PokemonEntity)
 
 
 class PokemonAdmin(admin.ModelAdmin):
-    list_display = ('title', 'image')
+    list_display = ('title', 'title_en', 'title_jp')
+    search_fields = ('title', 'title_en', 'title_jp')
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'title_en', 'title_jp', 'image', 'description')
+        }),
+    )
 
 class PokemonEntityAdmin(admin.ModelAdmin):
     list_display = ('pokemon', 'level', 'health', 'strength', 'defence', 'stamina', 'is_active')
