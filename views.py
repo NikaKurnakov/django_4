@@ -22,6 +22,8 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     )
     folium.Marker(
         [lat, lon],
+        # Warning! `tooltip` attribute is disabled intentionally
+        # to fix strange folium cyrillic encoding bug
         icon=icon,
     ).add_to(folium_map)
 
@@ -52,9 +54,6 @@ def show_all_pokemons(request):
                 'pokemon_id': pokemon.id,
                 'img_url': request.build_absolute_uri(pokemon.image.url) if pokemon.image else None,
                 'title_ru': pokemon.title,
-                'title_en': pokemon.title_en,
-                'title_jp': pokemon.title_jp,
-                'description': pokemon.description
             })
 
         return render(request, "mainpage.html", context={
@@ -67,18 +66,20 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     current_time = timezone.localtime(timezone.now())
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-    active_entities = pokemon.entities.filter(
-        appeared_at__lte=current_time,
-        disappeared_at__gte=current_time
-    )
-    
+
+
     pokemon_data = {
         'pokemon_id': pokemon.id,
         'img_url': request.build_absolute_uri(pokemon.image.url) if pokemon.image else None,
         'title_ru': pokemon.title,
+        'title_en': pokemon.title_en,
+        'title_jp': pokemon.title_jp,
+        'description': pokemon.description,
+        'previous_evolution': pokemon.previous_evolution,
     }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
