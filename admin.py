@@ -7,11 +7,16 @@ admin.site.register(PokemonEntity)
 
 
 class PokemonAdmin(admin.ModelAdmin):
-    list_display = ('title', 'title_en', 'title_jp')
-    search_fields = ('title', 'title_en', 'title_jp')
+    list_display = ('title', 'previous_evolution')
+    list_filter = ('previous_evolution',)
+    search_fields = ('title',)
     fieldsets = (
         (None, {
             'fields': ('title', 'title_en', 'title_jp', 'image', 'description')
+        }),
+        ('Эволюция', {
+            'fields': ('previous_evolution',),
+            'classes': ('collapse',)
         }),
     )
 
