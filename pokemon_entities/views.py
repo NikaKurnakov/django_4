@@ -29,38 +29,37 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 
 def show_all_pokemons(request):
-    with open('pokemon_entities/pokemons.json', encoding='utf-8') as database:
-        pokemons = json.load(database)['pokemons']
-
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon in pokemons:
-        for pokemon_entity in pokemon['entities']:
-            add_pokemon(
-                folium_map, pokemon_entity['lat'],
-                pokemon_entity['lon'],
-                pokemon['img_url']
-            )
-        current_time = timezone.localtime(timezone.now())
-        active_entities = PokemonEntity.objects.filter(
-            appeared_at__lte=current_time,
-            disappeared_at__gte=current_time
-        ).select_related('pokemon')
-        pokemons = Pokemon.objects.prefetch_related(
-            'entities'
-        ).all()
-        pokemons_on_page = []
-        for pokemon in pokemons:
-            pokemons_on_page.append({
-                'pokemon_id': pokemon.id,
-                'img_url': request.build_absolute_uri(pokemon.image.url) if pokemon.image else None,
-                'title_ru': pokemon.title,
-            })
-
-        return render(request, "mainpage.html", context={
-            'pokemons': pokemons_on_page,
-            'map': folium_map._repr_html_(),
-            'current_time': current_time.strftime("%Y-%m-%d %H:%M:%S"),
+    now = timezone.localtime(timezone.now())
+    active_entities = PokemonEntity.objects.filter(
+        appeared_at__lte=now,
+        disappeared_at__gte=now
+    ).select_related('pokemon')
+    unique_pokemons = {entity.pokemon for entity in active_entities}
+    pokemons_on_page = []
+    for pokemon in unique_pokemons:
+        pokemons_on_page.append({
+            'pokemon_id': pokemon.id,
+            'img_url': request.build_absolute_uri(pokemon.image.url) if pokemon.image else None,
+            'title_ru': pokemon.title,
         })
+    map_pokemons = []
+    for entity in active_entities:
+        map_pokemons.append({
+            'lat': entity.lat,
+            'lon': entity.lon,
+            'img_url': request.build_absolute_uri(entity.pokemon.image.url) if entity.pokemon.image else None,
+            'pokemon_id': entity.pokemon.id,
+            'level': entity.level,
+            'health': entity.health,
+            'strength': entity.strength,
+            'defence': entity.defence,
+            'stamina': entity.stamina,
+        })
+
+    return render(request, "mainpage.html", context={
+        'pokemons': pokemons_on_page,
+        'map_pokemons': map_pokemons,
+    })
 
 
 def show_pokemon(request, pokemon_id):
